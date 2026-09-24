@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Заявка на заселение в общежитие</title>
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --card-bg: #ffffff;
+    --primary: #2d6cdf;
+    --primary-dark: #1f4fa8;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #dbe2ea;
+    --ok: #1b8a5a;
+    --ok-bg: #e6f7ef;
+    --fail: #c0392b;
+    --fail-bg: #fdecea;
+    --shadow: 0 4px 16px rgba(30, 41, 59, 0.08);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 16px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+    text-align: center;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--muted);
+    margin-bottom: 24px;
+    font-size: 0.95rem;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+
+  .field {
+    margin-bottom: 18px;
+  }
+
+  label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+  }
+
+  input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.15s;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  button:hover:not(:disabled) {
+    background: var(--primary-dark);
+  }
+
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .hint {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  #result-card {
+    display: none;
+  }
+
+  .status-banner {
+    text-align: center;
+    padding: 16px;
+    border-radius: 10px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+
+  .status-banner.ok {
+    background: var(--ok-bg);
+    color: var(--ok);
+  }
+
+  .status-banner.fail {
+    background: var(--fail-bg);
+    color: var(--fail);
+  }
+
+  .checks {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: #fafbfc;
+  }
+
+  .check-icon {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: white;
+    margin-top: 1px;
+  }
+
+  .check-icon.pass { background: var(--ok); }
+  .check-icon.fail { background: var(--fail); }
+
+  .check-text {
+    font-size: 0.92rem;
+    line-height: 1.35;
+  }
+
+  .check-text .label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .check-text .detail {
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .error-box {
+    background: var(--fail-bg);
+    color: var(--fail);
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    margin-top: 14px;
+    display: none;
+  }
+
+  .spinner {
+    display: none;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Заявка на заселение в общежитие</h1>
+  <p class="subtitle">Проверка условий заселения студента в комнату</p>
+
+  <div class="card">
+    <form id="request-form">
+      <div class="field">
+        <label for="student-id">ID студента</label>
+        <input type="number" id="student-id" placeholder="например, 1" min="1" required>
+      </div>
+      <div class="field">
+        <label for="building-number">Номер корпуса</label>
+        <input type="number" id="building-number" placeholder="например, 1" min="1" required>
+      </div>
+      <div class="field">
+        <label for="room-number">Номер комнаты</label>
+        <input type="number" id="room-number" placeholder="например, 101" min="1" required>
+        <div class="hint">Например: 101, 102, 103, 201, 202, 203</div>
+      </div>
+      <button type="submit" id="submit-btn">Проверить заявку</button>
+    </form>
+    <div class="spinner" id="spinner">Проверка данных…</div>
+    <div class="error-box" id="error-box"></div>
+  </div>
+
+  <div class="card" id="result-card">
+    <div class="status-banner" id="status-banner"></div>
+    <div class="checks" id="checks"></div>
+  </div>
+</div>
+
+<script>
+  const API_BASE = "https://inai-col1.fishrungames.com";
+
+  const form = document.getElementById("request-form");
+  const submitBtn = document.getElementById("submit-btn");
+  const spinner = document.getElementById("spinner");
+  const errorBox = document.getElementById("error-box");
+  const resultCard = document.getElementById("result-card");
+  const statusBanner = document.getElementById("status-banner");
+  const checksEl = document.getElementById("checks");
+
+  async function fetchJson(url) {
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`Запрос ${url} вернул ошибку ${res.status}`);
+    }
+    return res.json();
+  }
+
+  function renderCheck(passed, label, detail) {
+    const item = document.createElement("div");
+    item.className = "check-item";
+    item.innerHTML = `
+      <div class="check-icon ${passed ? "pass" : "fail"}">${passed ? "✓" : "✕"}</div>
+      <div class="check-text">
+        <span class="label">${label}</span>
+        <span class="detail">${detail}</span>
+      </div>
+    `;
+    checksEl.appendChild(item);
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const studentId = document.getElementById("student-id").value.trim();
+    const buildingNumber = document.getElementById("building-number").value.trim();
+    const roomNumber = document.getElementById("room-number").value.trim();
+
+    errorBox.style.display = "none";
+    resultCard.style.display = "none";
+    checksEl.innerHTML = "";
+    spinner.style.display = "block";
+    submitBtn.disabled = true;
+
+    try {
+      const [student, building, room] = await Promise.all([
+        fetchJson(`${API_BASE}/students/${studentId}`),
+        fetchJson(`${API_BASE}/buildings/${buildingNumber}`),
+        fetchJson(`${API_BASE}/rooms/${roomNumber}`)
+      ]);
+
+      // Условие 1: студент иногородний (не является местным резидентом)
+      const isNonResident = student.resident === false;
+      // Условие 2: корпус предназначен для студентов
+      const isBuildingForStudents = building.forStudents === true;
+      // Условие 3: комната свободна
+      const isRoomAvailable = room.available === true;
+
+      const allPassed = isNonResident && isBuildingForStudents && isRoomAvailable;
+
+      renderCheck(
+        isNonResident,
+        "Иногородний студент",
+        `Студент: ${student.name ?? student.id} — ${student.resident ? "местный (не иногородний)" : "иногородний"}`
+      );
+      renderCheck(
+        isBuildingForStudents,
+        "Корпус предназначен для студентов",
+        `Корпус №${building.building_number} — ${building.forStudents ? "для студентов" : "не для студентов"}`
+      );
+      renderCheck(
+        isRoomAvailable,
+        "Комната свободна",
+        `Комната №${room.room_number} — ${room.available ? "свободна" : "занята"}`
+      );
+
+      statusBanner.textContent = allPassed
+        ? "✅ Заявка одобрена — заселение разрешено"
+        : "❌ Заявка отклонена";
+      statusBanner.className = "status-banner " + (allPassed ? "ok" : "fail");
+
+      resultCard.style.display = "block";
+    } catch (err) {
+      errorBox.textContent = "Ошибка: " + err.message + ". Проверьте, что введённые ID существуют.";
+      errorBox.style.display = "block";
+    } finally {
+      spinner.style.display = "none";
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>
